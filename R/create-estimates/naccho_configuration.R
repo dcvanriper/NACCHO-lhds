@@ -31,7 +31,7 @@ acs_dataset <- "2017_2021_ACS5a"
 options(scipen = 999)
 
 ## ---- Source R files to create require IPF functions ----
-source("scripts/04_2021_pop_est/ipf2df.txt")
+source("R/create-estimates/ipf-code/ipf2df.txt")
 
 ## ---- Constants ----
 
