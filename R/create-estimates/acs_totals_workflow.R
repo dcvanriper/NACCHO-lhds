@@ -4,7 +4,7 @@
 # This script checks to see if the ACS Place070 dataset exists. If it exists,
 # it loads in the data.
 # 
-# This script then iterates over individual states, loading in shapefiles, and merging them
+# This script then iterates over individual states, loading in CSVs, and merging them
 # with the Place070 data frame created by the acs_place070_prep.R script. It assigns an LHD
 # code (naccho_id) to records in the Place070 file and then creates a state-level dataset by LHD 
 # containing an estimate for the following:
@@ -94,20 +94,20 @@ generate_acs_totals <- function(st){
     filter(STUSAB == st)
   
   # load place LHDs - there will always be a place LHD CSV
-  pl_lhds <- read_csv(glue("{dat_dir}/tables/lists_to_update/{st}/{st}_place_lhds.csv"), col_types = "ccccc") |> 
+  pl_lhds <- read_csv(glue("{dat_dir}/lists_to_update/{lhd_vintage}/{st}/{st}_place_lhds.csv"), col_types = "cccccccc") |> 
     mutate(STATEA = str_sub(GISJOIN_PL, 2, 3),
            PLACE = str_sub(GISJOIN_PL, 5, 9))
   
   # if exists, load county lhds  
-  if(file.exists(glue("{dat_dir}/tables/lists_to_update/{st}/{st}_county_lhds.csv"))){
-    county_lhds <- read_csv(glue("{dat_dir}/tables/lists_to_update/{st}/{st}_county_lhds.csv"), col_types = "ccccc") |> 
+  if(file.exists(glue("{dat_dir}/lists_to_update/{lhd_vintage}/{st}/{st}_county_lhds.csv"))){
+    county_lhds <- read_csv(glue("{dat_dir}/lists_to_update/{lhd_vintage}/{st}/{st}_county_lhds.csv"), col_types = "cccccccc") |> 
       mutate(STATEA = str_sub(GISJOIN_CTY, 2, 3),
              COUNTYA = str_sub(GISJOIN_CTY, 5, 7))
   }
   
-  # if exists, load county lhds  
-  if(file.exists(glue("{dat_dir}/tables/lists_to_update/{st}/{st}_cousub_lhds.csv"))){
-    cousub_lhds <- read_csv(glue("{dat_dir}/tables/lists_to_update/{st}/{st}_cousub_lhds.csv"), col_types = "cccccc") |> 
+  # if exists, load county subdivision lhds  
+  if(file.exists(glue("{dat_dir}/lists_to_update/{lhd_vintage}/{st}/{st}_cousub_lhds.csv"))){
+    cousub_lhds <- read_csv(glue("{dat_dir}/lists_to_update/{lhd_vintage}/{st}/{st}_cousub_lhds.csv"), col_types = "ccccccccc") |> 
       mutate(STATEA = str_sub(GISJOIN_CS, 2, 3),
              COUNTYA = str_sub(GISJOIN_CS, 5, 7),
              COUSUB = str_sub(GISJOIN_CS, 9, 13))
@@ -225,3 +225,4 @@ place070 <- place070 |>
          perc_hh = case_when(is.nan(perc_hh) ~ 0,
                              TRUE ~ perc_hh)) |>
   select(-starts_with("cousub_"))
+

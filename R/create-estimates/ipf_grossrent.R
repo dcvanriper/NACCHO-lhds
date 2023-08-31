@@ -86,20 +86,20 @@ generate_acs_grossrent_ipf <- function(st){
     filter(STUSAB == st) 
   
   # load place LHDs - there will always be a place LHD CSV
-  pl_lhds <- read_csv(glue("{dat_dir}/tables/lists_to_update/{st}/{st}_place_lhds.csv"), col_types = "ccccc") |> 
+  pl_lhds <- read_csv(glue("{dat_dir}/lists_to_update/{lhd_vintage}/{st}/{st}_place_lhds.csv"), col_types = "cccccccc") |> 
     mutate(STATEA = str_sub(GISJOIN_PL, 2, 3),
            PLACE = str_sub(GISJOIN_PL, 5, 9))
   
   # if exists, load county lhds  
-  if(file.exists(glue("{dat_dir}/tables/lists_to_update/{st}/{st}_county_lhds.csv"))){
-    county_lhds <- read_csv(glue("{dat_dir}/tables/lists_to_update/{st}/{st}_county_lhds.csv"), col_types = "ccccc") |> 
+  if(file.exists(glue("{dat_dir}/lists_to_update/{lhd_vintage}/{st}/{st}_county_lhds.csv"))){
+    county_lhds <- read_csv(glue("{dat_dir}/lists_to_update/{lhd_vintage}/{st}/{st}_county_lhds.csv"), col_types = "cccccccc") |> 
       mutate(STATEA = str_sub(GISJOIN_CTY, 2, 3),
              COUNTYA = str_sub(GISJOIN_CTY, 5, 7))
   }
   
   # if exists, load county lhds  
-  if(file.exists(glue("{dat_dir}/tables/lists_to_update/{st}/{st}_cousub_lhds.csv"))){
-    cousub_lhds <- read_csv(glue("{dat_dir}/tables/lists_to_update/{st}/{st}_cousub_lhds.csv"), col_types = "cccccc") |> 
+  if(file.exists(glue("{dat_dir}/lists_to_update/{lhd_vintage}/{st}/{st}_cousub_lhds.csv"))){
+    cousub_lhds <- read_csv(glue("{dat_dir}/lists_to_update/{lhd_vintage}/{st}/{st}_cousub_lhds.csv"), col_types = "ccccccccc") |> 
       mutate(STATEA = str_sub(GISJOIN_CS, 2, 3),
              COUNTYA = str_sub(GISJOIN_CS, 5, 7),
              COUSUB = str_sub(GISJOIN_CS, 9, 13))
@@ -232,10 +232,13 @@ generate_acs_grossrent_ipf <- function(st){
                 no_cash_rent = sum(no_cash_rent)) |> 
       filter(!is.na(naccho_id))
     
+    pl_lhds_grossrent <- pl_lhds_grossrent
+    
     
     ## ---- Replace estimates in st_lhd_grossrent by values in pl_lhds_grossrent ----
     st_lhd_grossrent_drop <- st_lhd_grossrent |>
       filter(!naccho_id %in% pl_lhds_grossrent$naccho_id)
+    
     
     # bind place-based LHDs with remainder
     st_lhd_grossrent_bind <- bind_rows(st_lhd_grossrent_drop, pl_lhds_grossrent) |>
@@ -313,7 +316,7 @@ generate_acs_grossrent_ipf <- function(st){
 }
 
 ## ---- Iterate over all states to generate ACS renter-occupied gross rent counts ----
-acs_grossrent_by_state <- map(state_abbr, ~generate_acs_grossrent_ipf(.x))
+acs_grossrent_by_state <- map(state_abbr, ~generate_acs_grossrent_ipf(.x)) ## Issue with something being character and something being logical (naccho_id)
 
 ## ---- Convert out to a tibble using bind_rows ----
 acs_grossrent <- bind_rows(acs_grossrent_by_state) 

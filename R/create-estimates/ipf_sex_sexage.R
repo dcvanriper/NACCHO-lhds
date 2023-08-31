@@ -3,6 +3,11 @@
 # proportional fitting. It then generates LHD estimates of females by age and
 # males by age using iterative proportional fitting.
 
+require(tidyverse)
+require(vroom)
+require(glue)
+require(ipumsr)
+
 ## ---- Create and download an ACS 5-year extract for the sex IPF ----
 # If the directory in the data object doesn't exist, the next code snipped will create the directory
 if(!dir.exists(download_acs_sexage_dir)){
@@ -79,20 +84,20 @@ generate_acs_sex_ipf <- function(st){
     filter(STUSAB == st)
   
   # load place LHDs - there will always be a place LHD CSV
-  pl_lhds <- read_csv(glue("{dat_dir}/tables/lists_to_update/{st}/{st}_place_lhds.csv"), col_types = "ccccc") |> 
+  pl_lhds <- read_csv(glue("{dat_dir}/lists_to_update/{lhd_vintage}/{st}/{st}_place_lhds.csv"), col_types = "cccccccc") |> 
     mutate(STATEA = str_sub(GISJOIN_PL, 2, 3),
            PLACE = str_sub(GISJOIN_PL, 5, 9))
   
   # if exists, load county lhds  
-  if(file.exists(glue("{dat_dir}/tables/lists_to_update/{st}/{st}_county_lhds.csv"))){
-    county_lhds <- read_csv(glue("{dat_dir}/tables/lists_to_update/{st}/{st}_county_lhds.csv"), col_types = "ccccc") |> 
+  if(file.exists(glue("{dat_dir}/lists_to_update/{lhd_vintage}/{st}/{st}_county_lhds.csv"))){
+    county_lhds <- read_csv(glue("{dat_dir}/lists_to_update/{lhd_vintage}/{st}/{st}_county_lhds.csv"), col_types = "cccccccc") |> 
       mutate(STATEA = str_sub(GISJOIN_CTY, 2, 3),
              COUNTYA = str_sub(GISJOIN_CTY, 5, 7))
   }
   
   # if exists, load county lhds  
-  if(file.exists(glue("{dat_dir}/tables/lists_to_update/{st}/{st}_cousub_lhds.csv"))){
-    cousub_lhds <- read_csv(glue("{dat_dir}/tables/lists_to_update/{st}/{st}_cousub_lhds.csv"), col_types = "cccccc") |> 
+  if(file.exists(glue("{dat_dir}/lists_to_update/{lhd_vintage}/{st}/{st}_cousub_lhds.csv"))){
+    cousub_lhds <- read_csv(glue("{dat_dir}/lists_to_update/{lhd_vintage}/{st}/{st}_cousub_lhds.csv"), col_types = "ccccccccc") |> 
       mutate(STATEA = str_sub(GISJOIN_CS, 2, 3),
              COUNTYA = str_sub(GISJOIN_CS, 5, 7),
              COUSUB = str_sub(GISJOIN_CS, 9, 13))
@@ -241,20 +246,20 @@ generate_acs_sexage_ipf <- function(st){
     filter(STUSAB == st)
   
   # load place LHDs - there will always be a place LHD CSV
-  pl_lhds <- read_csv(glue("{dat_dir}/tables/lists_to_update/{st}/{st}_place_lhds.csv"), col_types = "ccccc") |> 
+  pl_lhds <- read_csv(glue("{dat_dir}/lists_to_update/{lhd_vintage}/{st}/{st}_place_lhds.csv"), col_types = "cccccccc") |> 
     mutate(STATEA = str_sub(GISJOIN_PL, 2, 3),
            PLACE = str_sub(GISJOIN_PL, 5, 9))
   
   # if exists, load county lhds  
-  if(file.exists(glue("{dat_dir}/tables/lists_to_update/{st}/{st}_county_lhds.csv"))){
-    county_lhds <- read_csv(glue("{dat_dir}/tables/lists_to_update/{st}/{st}_county_lhds.csv"), col_types = "ccccc") |> 
+  if(file.exists(glue("{dat_dir}/lists_to_update/{lhd_vintage}/{st}/{st}_county_lhds.csv"))){
+    county_lhds <- read_csv(glue("{dat_dir}/lists_to_update/{lhd_vintage}/{st}/{st}_county_lhds.csv"), col_types = "cccccccc") |> 
       mutate(STATEA = str_sub(GISJOIN_CTY, 2, 3),
              COUNTYA = str_sub(GISJOIN_CTY, 5, 7))
   }
   
   # if exists, load county lhds  
-  if(file.exists(glue("{dat_dir}/tables/lists_to_update/{st}/{st}_cousub_lhds.csv"))){
-    cousub_lhds <- read_csv(glue("{dat_dir}/tables/lists_to_update/{st}/{st}_cousub_lhds.csv"), col_types = "cccccc") |> 
+  if(file.exists(glue("{dat_dir}/lists_to_update/{lhd_vintage}/{st}/{st}_cousub_lhds.csv"))){
+    cousub_lhds <- read_csv(glue("{dat_dir}/lists_to_update/{lhd_vintage}/{st}/{st}_cousub_lhds.csv"), col_types = "ccccccccc") |> 
       mutate(STATEA = str_sub(GISJOIN_CS, 2, 3),
              COUNTYA = str_sub(GISJOIN_CS, 5, 7),
              COUSUB = str_sub(GISJOIN_CS, 9, 13))

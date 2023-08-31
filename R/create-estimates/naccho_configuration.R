@@ -41,7 +41,7 @@ state_abbr <- c(state.abb, "DC")
 state_abbr <- setdiff(state_abbr, "RI")
 
 ## Data directory path. This is the path to the main directory that contains all required data files.
-user <- "dvanriper" # We may not need this depending on how we set up the system on the NACCHO computing system
+user <- "knowlesk" # We may not need this depending on how we set up the system on the NACCHO computing system
 dat_dir <- glue("/Users/{user}/Box Sync/NACCHO GIS/data_working")
 
 ## Output data directory path for ACS and urban/rural estimates. These are the paths where output files are written.
@@ -108,3 +108,4 @@ acs_grossrent <- "B25063"
 
 # Download directory
 download_acs_grossrent_dir <- glue(dat_dir, "/tables/nhgis-csv/{acs_dataset}/grossrent")
+
