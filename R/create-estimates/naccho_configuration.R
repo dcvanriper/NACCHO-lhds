@@ -27,11 +27,15 @@ lhd_vintage <- "lhd2022"
 ## 2020_2024_ACS5a
 acs_dataset <- "2017_2021_ACS5a"
 
+## SET THE DATA DIRECTORY PATH
+## This is the path to the main directory that contains all required data files.
+user <- "knowlesk" # This should be edited if a new person runs the script
+dat_dir <- glue("/Users/{user}/Box Sync/NACCHO GIS/data_working") 
+
+## ---- !!!YOU SHOULD NOT NEED TO EDIT BELOW INFORMATION!!! ---- 
+
 ## ---- Set scientific notations to off ----
 options(scipen = 999)
-
-## ---- Source R files to create require IPF functions ----
-source("R/create-estimates/ipf-code/ipf2df.txt")
 
 ## ---- Constants ----
 
@@ -39,10 +43,6 @@ source("R/create-estimates/ipf-code/ipf2df.txt")
 ## no LHDs.
 state_abbr <- c(state.abb, "DC")
 state_abbr <- setdiff(state_abbr, "RI")
-
-## Data directory path. This is the path to the main directory that contains all required data files.
-user <- "dvanriper" # We may not need this depending on how we set up the system on the NACCHO computing system
-dat_dir <- glue("/Users/{user}/Box Sync/NACCHO GIS/data_working")
 
 ## Output data directory path for ACS and urban/rural estimates. These are the paths where output files are written.
 acs_output_dir <- glue("{dat_dir}/output-data/{acs_dataset}")
@@ -108,3 +108,71 @@ acs_grossrent <- "B25063"
 
 # Download directory
 download_acs_grossrent_dir <- glue(dat_dir, "/tables/nhgis-csv/{acs_dataset}/grossrent")
+
+## ---- !!!DO NOT EDIT BELOW!!! ---- 
+
+## ---- Source R code to create require IPF functions ----
+# Iterative proportional fitting code used in all ipf scripts -- DO NOT EDIT
+ipf2 <- function(rowcontrol, colcontrol, seed, maxiter=50, closure=0.0001, debugger=FALSE){
+  # input data checks: 
+  if(debugger)print("checking inputs")
+  #sum of marginal totals equal and no zeros in marginal totals
+  if(debugger){print("checking rowsum=colsum")}
+  if(sum(rowcontrol) != sum(colcontrol)) 
+    stop("sum of rowcontrol must equal sum of colcontrol")
+  if(debugger){print("checking rowsums for zeros")}
+  if(any(rowcontrol==0)){
+    numzero <- sum(rowcontrol==0)
+    rowcontrol[rowcontrol==0] <- 0.001
+    warning(paste(numzero, "zeros in rowcontrol argument replaced with 0.001", sep=" "))
+  }
+  if(debugger){print("Checking colsums for zeros")}
+  if(any(colcontrol==0)){
+    numzero <- sum(colcontrol==0)
+    colcontrol[colcontrol==0] <- 0.001
+    warning(paste(numzero, "zeros in colcontrol argument replaced with 0.001", sep=" "))
+  }
+  if(debugger){print("Checking seed for zeros")}
+  if(any(seed==0)){
+    numzero <- sum(seed==0)
+    seed[seed==0] <- 0.001
+    warning(paste(numzero, "zeros in seed argument replaced with 0.001", sep=" "))
+  }
+  # set initial values
+  result <- seed
+  rowcheck <- 1
+  colcheck <- 1
+  checksum <- 1
+  iter <- 0
+  # successively proportion rows and columns until closure or iteration criteria are met
+  ##########
+  if(debugger){print(checksum > closure);print(iter < maxiter)}
+  while((checksum > closure) && (iter < maxiter))
+  {
+    #########
+    if(debugger){print(paste("(re)starting the while loop, iteration=",iter)) }
+    
+    coltotal <- colSums(result)
+    colfactor <- colcontrol/coltotal
+    result <- sweep(result, 2, colfactor, "*")
+    if(debugger){
+      print(paste("column factor = ",colfactor))
+      print(result)}
+    
+    rowtotal <- rowSums(result)
+    rowfactor <- rowcontrol/rowtotal
+    result <- sweep(result, 1, rowfactor, "*")
+    if(debugger){
+      print(paste("row factor = ",rowfactor))
+      print(result)}
+    
+    rowcheck <- sum(abs(1-rowfactor))
+    colcheck <- sum(abs(1-colfactor))
+    checksum <- max(rowcheck,colcheck)
+    iter <- iter + 1
+    #print(paste("Ending while loop, checksum > closure",checksum > closure,"iter < maxiter",iter < maxiter))
+  }#End while loop
+  
+  result <- list(fitted.table=result, number.iterations=iter, tolerance=checksum)
+  result
+}
