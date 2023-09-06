@@ -19,10 +19,6 @@ library(glue)
 states <- state.abb[!state.abb == "RI"] # RI is not part of NACCHO so removed
 states <- c(states, "DC") # add DC to the list
 
-# For testing
-# state <- c("MA")
-# state <- "GA"
-
 # Function to Load and pivot all county files 
 ctys_load <-  function(state_list) {
   
