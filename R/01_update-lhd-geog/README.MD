@@ -6,6 +6,8 @@ The first step in updating the population estimates for local health departments
 2. Update long format CSVs manually
 3. Create new wide format denominator files for NACCHO reference - these are not used to create population estimates
 
+To get the most up to date population estimates, you will need to use the newest geographic units. Each year, the updated data are released from NHGIS in December (is this right?). You will use those data to make the new files for that year to update. For example, in 2023 you will need to wait until early December to start this process with the newly released 2022 ACS data to get the most up to date population estimates for the new LHD boundaries.
+
 ## Step 1: Initial Set-up
 Follow the instructions found in the README.md file on the homepage of the git repository (https://github.com/dcvanriper/NACCHO-lhds/tree/main). Once the necessary software and directories are setup, proceed with the following steps to update the LHD geographic coverage files.
 
