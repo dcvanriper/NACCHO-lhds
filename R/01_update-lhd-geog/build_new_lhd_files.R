@@ -111,8 +111,8 @@ states <- c(states, "DC") # add DC to the list
 ## Build directory for new output lists
 
 # Set update directory
-old_list_dir <- glue("{dat_dir}/tables/lists_to_update/{former_lhd_vintage}")
-new_list_dir <- glue("{dat_dir}/tables/lists_to_update/{lhd_vintage}")
+old_list_dir <- glue("{dat_dir}/lists_to_update/{former_lhd_vintage}")
+new_list_dir <- glue("{dat_dir}/lists_to_update/{lhd_vintage}")
 
 # Check for new lhd year directory and build if it does not exist
 if (dir.exists(new_list_dir)) {
@@ -138,8 +138,8 @@ update_long_lists <- function(state_list)  {
   
   state <- state_list
   
-  last_year_st_dir <- glue("{dat_dir}/tables/lists_to_update/{former_lhd_vintage}/{state}")
-  new_year_st_dir <- glue("{dat_dir}/tables/lists_to_update/{lhd_vintage}/{state}")
+  last_year_st_dir <- glue("{dat_dir}/lists_to_update/{former_lhd_vintage}/{state}")
+  new_year_st_dir <- glue("{dat_dir}/lists_to_update/{lhd_vintage}/{state}")
   
   # Paths to state folders for old vintage
   county_old_path <- glue("{last_year_st_dir}/{state}_county_lhds.csv")
@@ -329,15 +329,15 @@ place_full_join <- bind_rows(map(update_fips_lists, ~.x$place_full_join))
 # Filter to only records with naccho_ids that are not in the new file
 cty_lost_lhds <- cty_full_join %>%
   filter(is.na(STATEA_U) & !is.na(naccho_id)) %>%
-  select(GISJOIN_CTY, STATEA, COUNTYA, NAME_CTY, naccho_id, lhd_name)
+  select(GISJOIN_CTY, STATEA, COUNTYA, NAME_CTY, naccho_id, lhd_name, notes)
 
 cousub_lost_lhds <- cousub_full_join %>%
   filter(is.na(STATEA_U) & !is.na(naccho_id)) %>%
-  select(GISJOIN_CS, STATEA, COUNTYA, NAME_CTY, COUSUB, NAME_CS, naccho_id, lhd_name)
+  select(GISJOIN_CS, STATEA, COUNTYA, NAME_CTY, COUSUB, NAME_CS, naccho_id, lhd_name, notes)
 
 place_lost_lhds <- place_full_join %>%
   filter(is.na(STATEA_U) & !is.na(naccho_id)) %>%
-  select(GISJOIN_PL, STATEA, PLACE, NAME_PL, naccho_id, lhd_name)
+  select(GISJOIN_PL, STATEA, PLACE, NAME_PL, naccho_id, lhd_name, notes)
 
 # Write out lost records lists
 write_csv(cty_lost_lhds, glue("{new_list_dir}/dropped_cty_records.csv"))

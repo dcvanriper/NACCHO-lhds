@@ -23,7 +23,7 @@ states <- c(states, "DC") # add DC to the list
 ctys_load <-  function(state_list) {
   
   state <- state_list
-  tbl_dir <- glue("{dat_dir}/tables/lists_to_update/{lhd_vintage}/{state}")
+  tbl_dir <- glue("{dat_dir}/lists_to_update/{lhd_vintage}/{state}")
   cty_long_path <- glue("{tbl_dir}/{state}_county_lhds.csv")
   
   if (file.exists(cty_long_path)) {
@@ -66,7 +66,7 @@ ctys_concat <- ctys_long %>%
 cousubs_load <- function(state_list) {
   
   state <- state_list
-  tbl_dir <- glue("{dat_dir}/tables/lists_to_update/{lhd_vintage}/{state}")
+  tbl_dir <- glue("{dat_dir}/lists_to_update/{lhd_vintage}/{state}")
   cousub_long_path <- glue("{tbl_dir}/{state}_cousub_lhds.csv")
   
   if (file.exists(cousub_long_path)) {
@@ -109,7 +109,7 @@ cousubs_concat <- cousubs_long %>%
 places_load <- function(state_list) {
   
   state <- state_list
-  tbl_dir <- glue("{dat_dir}/tables/lists_to_update/{lhd_vintage}/{state}")
+  tbl_dir <- glue("{dat_dir}/lists_to_update/{lhd_vintage}/{state}")
   place_long_path <- glue("{tbl_dir}/{state}_place_lhds.csv")
   
   if (file.exists(place_long_path)) {
@@ -180,7 +180,7 @@ denom_concat <- replace(ctys_cousubs_places_concat, is.na(ctys_cousubs_places_co
 ## ---- Write out final wide files ----
 
 # Write out single denominator file
-write_csv(denom_wide, glue("{dat_dir}/tables/lists_to_update/{lhd_vintage}/fips_denominator_{lhd_vintage}.csv"))
+write_csv(denom_wide, glue("{dat_dir}/lists_to_update/{lhd_vintage}/fips_denominator_{lhd_vintage}.csv"))
 
 # Write out single denominator file w/ names concatenated into three columns
-write_csv(denom_concat, glue("{dat_dir}/tables/lists_to_update/{lhd_vintage}/denominator_{lhd_vintage}.csv"))
+write_csv(denom_concat, glue("{dat_dir}/lists_to_update/{lhd_vintage}/denominator_{lhd_vintage}.csv"))
