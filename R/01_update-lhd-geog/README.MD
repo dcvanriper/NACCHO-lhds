@@ -6,8 +6,10 @@ The first step in updating the population estimates for local health departments
 2. Update long format CSVs manually
 3. Create new wide format denominator files for NACCHO reference - these are not used to create population estimates
 
+New ACS 5-year datasets are released in December, and IPUMS NHGIS tries to add them within six weeks of their release. For example, the 2018-2022 ACS dataset will be released in December, 2023. IPUMS NHGIS should have them available by the end of January, 2024. Thus, long format CSVs compatible with the 2018-2022 dataset can be generated in January or February, 2024.
+
 ## Step 1: Initial Set-up
-Follow the instructions found in the README.md file on the homepage of the git repository (https://github.com/dcvanriper/NACCHO-lhds/tree/main). Once the necessary software and directories are setup, proceed with the following steps to update the LHD geographic coverage files.
+Follow the instructions found in the README.md file on the homepage of the [git repository](https://github.com/dcvanriper/NACCHO-lhds/tree/main). Once the necessary software and directories are setup, proceed with the following steps to update the LHD geographic coverage files.
 
 ## Step 2: Edit and run configuration file
 To run the R scripts used in this process, some basic parameters need to be set for each update year. Follow the instructions in `lhd_updates_config.R` to:
@@ -22,10 +24,10 @@ Once this script is edited, run the entire script. Anytime NACCHO staff clears t
 ## Step 3: Build LHD coverage CSV files for new year
 Run `build_new_lhd_files.R` to create a new folder with starting lists for the new year. These are the files you will edit that will then feed into the scripts to build the estimates. This script accomplishes four things:
 
-1. Creates a directory for the new update year and sub directories for each state.
-2. Builds new long format CSV files to update. It creates these files by state and writes them out to state specific folders containing two files, one place list, and either a county or county subdivision list.    
-    a. {state}_county_lhds.csv   
-    b. {state}_cousub_lhds.csv   
+1. Creates a directory for the new update year `data/lists_to_update/lhd{year}` and sub directories for each state `data/lists-to-update/{state}`
+2. Builds new long format CSV files to update. It writes two files, one place list, and either a county or county subdivision list to the state specific folders created above.    
+    a. {state}_county_lhds.csv  
+    b. {state}_cousub_lhds.csv 
     c. {state}_place_lhds.csv   
 3. Copies denominator files from the year prior for NACCHO reference.  
     a. denominator_{former_lhd_vintage}.csv   
@@ -33,10 +35,10 @@ Run `build_new_lhd_files.R` to create a new folder with starting lists for the n
 4. Builds lists of records in the long files from the prior year that are not in the long files for the new year. These records are dropped due to changes in the FIPS codes. These files should be referenced to ensure LHDs are attached to.  
     a. dropped_cty_records.csv   
     b. dropped_cousub_records.csv   
-    c. dropped_place_records.csv   
+    c. dropped_place_records.csv  
 
 ## Step 4: Edit LHD coverage CSV files
-Manually edit the long CSV files created by running `build_new_lhd_files.R` to reflect new LHD coverage. There will be two files for each state, either a County and a Place file, or a County Subdivision (cousub) and a Place file. All files created in Step 3 will be useful in the update process, but only the long format csvs need to be updated to calculate the population estimates.    
+Manually edit the long CSV files created by running `build_new_lhd_files.R` to reflect new LHD coverage. There will be two files for each state, either a County and a Place file, or a County Subdivision (cousub) and a Place file. All files created in Step 3 will be useful in the update process, but only the long format csvs need to be updated to calculate the population estimates. All of the files listed below are located in state specific sub directoreis `data/lists-to-update/{state}`.    
 #### Files to edit (long format):
 1. {state}_county_lhds.csv
 2. {state}_cousub_lhds.csv
@@ -47,9 +49,11 @@ Manually edit the long CSV files created by running `build_new_lhd_files.R` to r
 3. dropped_place_records.csv 
 4. denominator_{former_lhd_vintage}.csv
 5. fips_denominator_{former_lhd_vintage}.csv
-6. lhd_geog_updates_codebook.xlsx (This file details the contents of each CSV listed above)
 
-The goal of this process is to create accurate long format CSVs that reflect the current coverage areas of all member LHDs. This is accomplished by adding or removing the long format CSVs  
+The goal of this process is to create accurate long format CSVs that reflect the current coverage areas of all member LHDs. This is accomplished by adding or removing the long format CSVs 
+
+Refer to lhd_geog_updates_codebook.xlsx located in `data/lists_to_update` for more detailed file descriptions and variable definitions.
+
 ### Editing guide
 #### 1. Review long format CSVs
 - Identify changes that need to be made based on outreach process.
@@ -61,7 +65,7 @@ The goal of this process is to create accurate long format CSVs that reflect the
 - Check records flaged as new ("1" in the new_record column) to determine if a NACCHO ID should be attached to them.
 
 *Things to note as NACCHO staff make updates:*
-1. LHDs may cover one or more geographic units in a single file (ex. one or more Counties in {state}_county_lhds.csv) or may be cover units in multiple files (ex. one or more County Subdivisions in {state}_cousub_lhds.csv and one or more Places in {state}_place_lhds.csv).
+1. LHDs may cover one or more geographic units in a single file (ex. one or more Counties in {state}_county_lhds.csv or may be cover units in multiple files (ex. one or more County Subdivisions in {state}_cousub_lhds.csv and one or more Places in {state}_place_lhds.csv).
 2. The population estimate sctripts will handle any LHD coverage overlaps by always defaulting to the Place (city or town) LHD. For example if a Place health department exists, and the County the Place is in also has a health department, the population estimates for the Place health department will be for the entire Place, and the county health department estimates will be for the remainder of the County that does not overlap with the Place.
 3. LHDs listed in the dropped_{Census unit}_records.csv files should be inspected to determine if they need to be reasigned to different records in the long files.
 4. All files must remain in CSV format. The scripts to create estimates and build the files to update the geographic coverage for the next year are built to handle CSV files and will not run if the files are saved as .xlsx or any other non-CSV format. 
@@ -83,3 +87,6 @@ Run `build_wide_denominator.R` - This script creates two new wide denominator fi
 Review new denominator files (either one) to ensure they reflect the expected coverage. If there are any errors identified, return to the long format CSV files found in the state directories and make the necessary changes there. Then repeat **Step 6**. This will overwrite the two denominators files which you can review for a second time. If you want to keep a version of the incorrect files you will need to rename them and/or move them to a different location to avoid them being overwritten.
 
 Once the final review is complete, the LHD geographic coverage update process is complete and the files are ready to be used in the population estimates update
+
+## Questions
+If you have questions about this workflow or the data please reach out to David Van Riper (vanriper@umn.edu) or Kate Knowles (knowlesk@umn.edu). 

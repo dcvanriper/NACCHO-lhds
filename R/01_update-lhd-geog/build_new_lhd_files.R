@@ -111,8 +111,8 @@ states <- c(states, "DC") # add DC to the list
 ## Build directory for new output lists
 
 # Set update directory
-old_list_dir <- glue("{dat_dir}/tables/lists_to_update/{former_lhd_vintage}")
-new_list_dir <- glue("{dat_dir}/tables/lists_to_update/{lhd_vintage}")
+old_list_dir <- glue("{dat_dir}/lists_to_update/{former_lhd_vintage}")
+new_list_dir <- glue("{dat_dir}/lists_to_update/{lhd_vintage}")
 
 # Check for new lhd year directory and build if it does not exist
 if (dir.exists(new_list_dir)) {
@@ -138,8 +138,8 @@ update_long_lists <- function(state_list)  {
   
   state <- state_list
   
-  last_year_st_dir <- glue("{dat_dir}/tables/lists_to_update/{former_lhd_vintage}/{state}")
-  new_year_st_dir <- glue("{dat_dir}/tables/lists_to_update/{lhd_vintage}/{state}")
+  last_year_st_dir <- glue("{dat_dir}/lists_to_update/{former_lhd_vintage}/{state}")
+  new_year_st_dir <- glue("{dat_dir}/lists_to_update/{lhd_vintage}/{state}")
   
   # Paths to state folders for old vintage
   county_old_path <- glue("{last_year_st_dir}/{state}_county_lhds.csv")
@@ -163,31 +163,36 @@ update_long_lists <- function(state_list)  {
   ## Counties
   
   if (file.exists(county_old_path)) {
-    
+
     # Load county file from prior year
     cty_long <- read_csv(county_old_path, col_types = cols(.default = col_character())) %>%
-      select(!new_record)
+      select(!new_record) %>%
+      mutate(STATEB = map_chr(STATEA, ~lead_z(.x, 2)))
 
     # Filter new county list to state
     cty_st_new <- ctys_new %>%
-      filter(STATEA_U %in% cty_long$STATEA)
-    
+      filter(STATEA_U %in% cty_long$STATEB)
+
     # Join prior year naccho ids to current FIPS codes
     cty_st_new_join <- cty_st_new %>%
       full_join(cty_long, by = "GISJOIN_CTY") %>%
       mutate(new_record = ifelse(is.na(STATEA), "1", " ")) %>%
       relocate(new_record, .before = naccho_id)
-    
+
     # Filter out any records not from the new year (lost records) - These are the lists to update
     ctys_new_to_write <- cty_st_new_join %>%
       filter(!is.na(STATEA_U)) %>%
-      select(!c(STATEA, COUNTYA, NAME_CTY)) %>%
+      select(!c(STATEA, COUNTYA, NAME_CTY, STATEB)) %>%
       rename(STATEA = STATEA_U,
              COUNTYA = COUNTYA_U,
              NAME_CTY = NAME_CTY_U)
-    
+
     # Convert NAs to blanks
     ctys_new_to_write <- replace(ctys_new_to_write, is.na(ctys_new_to_write), " ")
+
+    # Wipe notes field clean
+    ctys_new_to_write <- ctys_new_to_write %>%
+      mutate(notes = " ")
 
     # Write CSV list
     write_csv(ctys_new_to_write, county_new_path)
@@ -197,7 +202,7 @@ update_long_lists <- function(state_list)  {
   } else {
 
     print(glue("No county shapefile for {state}"))
-    
+
     # Build dummy df for states that don't have this geography to use in full bind of old files
     cty_st_new_join <- data.frame()
 
@@ -209,29 +214,35 @@ update_long_lists <- function(state_list)  {
     
     # Load county subdivision file from prior year
     cousub_long <- read_csv(cousub_old_path, col_types = cols(.default = col_character())) %>%
-      select(!new_record)
+      select(!new_record) %>%
+      mutate(STATEB = map_chr(STATEA, ~lead_z(.x, 2)))
 
     # Filter new county list to state
     cousub_st_new <- cousubs_new %>%
-      filter(STATEA_U %in% cousub_long$STATEA)
-
+      filter(STATEA_U %in% cousub_long$STATEB)
+    
+    # Join old naccho ids to new county subdivision records
     cousub_st_new_join <- cousub_st_new %>%
       full_join(cousub_long) %>%
       mutate(new_record = ifelse(is.na(STATEA), "1", " ")) %>%
       relocate(new_record, .before = naccho_id)
-      
     
     cousub_new_to_write <- cousub_st_new_join %>%
       filter(!is.na(STATEA_U)) %>%
-      select(!c(STATEA, COUNTYA, NAME_CTY, NAME_CS)) %>%
+      select(!c(STATEA, COUNTYA, NAME_CTY, NAME_CS, COUSUB, STATEB)) %>%
       rename(STATEA = STATEA_U,
              COUNTYA = COUNTYA_U,
              NAME_CTY = NAME_CTY_U,
+             COUSUB = COUSUB_U,
              NAME_CS = NAME_CS_U)
 
     # Convert NAs to blanks
     cousub_new_to_write <- replace(cousub_new_to_write, is.na(cousub_new_to_write), " ")
-
+    
+    # Wipe notes field clean
+    cousub_new_to_write <- cousub_new_to_write %>% 
+      mutate(notes = " ")
+    
     # Write CSV list
     write_csv(cousub_new_to_write, cousub_new_path)
 
@@ -249,50 +260,56 @@ update_long_lists <- function(state_list)  {
 
   ## Places
 
-  if (file.exists(place_old_path)) {
-    
-    # Load place file from prior year
-    place_long <- read_csv(place_old_path, col_types = cols(.default = col_character())) %>%
-      select(!new_record)
+if (file.exists(place_old_path)) {
 
-    # Filter new county list to state
-    place_st_new <- places_new %>%
-      filter(STATEA_U %in% place_long$STATEA)
+  # Load place file from prior year
+  place_long <- read_csv(place_old_path, col_types = cols(.default = col_character())) %>%
+    select(!new_record) %>%
+    mutate(STATEB = map_chr(STATEA, ~lead_z(.x, 2)))
 
-    # Join naccho ids from prior year to new place file
-    place_st_new_join <- place_st_new %>%
-      full_join(place_long) %>%
-      mutate(new_record = ifelse(is.na(STATEA), "1", " ")) %>%
-      relocate(new_record, .before = naccho_id)
-    
-    # Filter to only rows with a record in the new file
-    place_new_to_write <- place_st_new_join %>%
-      filter(!is.na(STATEA_U)) %>%
-      select(!c(STATEA, PLACE, NAME_PL)) %>%
-      rename(STATEA = STATEA_U,
-             PLACE = PLACE_U,
-             NAME_PL = NAME_PL_U)
+  # Filter new county list to state
+  place_st_new <- places_new %>%
+    filter(STATEA_U %in% place_long$STATEA)
 
-    # Convert NAs to blanks
-    place_new_to_write <- replace(place_new_to_write, is.na(place_new_to_write), " ")
+  # Join naccho ids from prior year to new place file
+  place_st_new_join <- place_st_new %>%
+    full_join(place_long) %>%
+    mutate(new_record = ifelse(is.na(STATEA), "1", " ")) %>%
+    relocate(new_record, .before = naccho_id)
 
-    # Write CSV list
-    write_csv(place_new_to_write, place_new_path)
+  # Filter to only rows with a record in the new file
+  place_new_to_write <- place_st_new_join %>%
+    filter(!is.na(STATEA_U)) %>%
+    select(!c(STATEA, PLACE, NAME_PL, STATEB)) %>%
+    rename(STATEA = STATEA_U,
+           PLACE = PLACE_U,
+           NAME_PL = NAME_PL_U)
 
-    print(glue("Place CSV written for {state}"))
+  # Convert NAs to blanks
+  place_new_to_write <- replace(place_new_to_write, is.na(place_new_to_write), " ")
 
-  } else {
+  # Wipe notes field clean
+  place_new_to_write <- place_new_to_write %>%
+    mutate(notes = " ")
 
-    print(glue("No place shapefile for {state}, blank place CSV written"))
-    
-    # Build dummy df for states that don't have this geography to use in full bind of old files
-    place_st_new_join <- data.frame()
+  # Write CSV list
+  write_csv(place_new_to_write, place_new_path)
 
-  }
+  print(glue("Place CSV written for {state}"))
+
+} else {
+
+  print(glue("No place shapefile for {state}, blank place CSV written"))
+
+  # Build dummy df for states that don't have this geography to use in full bind of old files
+  place_st_new_join <- data.frame()
+
+}
   
   return(list(cty_full_join = cty_st_new_join,
               cousub_full_join = cousub_st_new_join,
               place_full_join = place_st_new_join))
+
 
 }
 
@@ -312,15 +329,15 @@ place_full_join <- bind_rows(map(update_fips_lists, ~.x$place_full_join))
 # Filter to only records with naccho_ids that are not in the new file
 cty_lost_lhds <- cty_full_join %>%
   filter(is.na(STATEA_U) & !is.na(naccho_id)) %>%
-  select(GISJOIN_CTY, STATEA, COUNTYA, NAME_CTY, naccho_id, lhd_name)
+  select(GISJOIN_CTY, STATEA, COUNTYA, NAME_CTY, naccho_id, lhd_name, notes)
 
 cousub_lost_lhds <- cousub_full_join %>%
   filter(is.na(STATEA_U) & !is.na(naccho_id)) %>%
-  select(GISJOIN_CS, STATEA, COUNTYA, NAME_CTY, COUSUB, NAME_CS, naccho_id, lhd_name)
+  select(GISJOIN_CS, STATEA, COUNTYA, NAME_CTY, COUSUB, NAME_CS, naccho_id, lhd_name, notes)
 
 place_lost_lhds <- place_full_join %>%
   filter(is.na(STATEA_U) & !is.na(naccho_id)) %>%
-  select(GISJOIN_PL, STATEA, PLACE, NAME_PL, naccho_id, lhd_name)
+  select(GISJOIN_PL, STATEA, PLACE, NAME_PL, naccho_id, lhd_name, notes)
 
 # Write out lost records lists
 write_csv(cty_lost_lhds, glue("{new_list_dir}/dropped_cty_records.csv"))

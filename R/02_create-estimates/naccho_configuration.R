@@ -30,7 +30,7 @@ acs_dataset <- "2017_2021_ACS5a"
 ## SET THE DATA DIRECTORY PATH
 ## This is the path to the main directory that contains all required data files.
 user <- "knowlesk" # This should be edited if a new person runs the script
-dat_dir <- glue("/Users/{user}/Box Sync/NACCHO GIS/data_working") 
+dat_dir <- glue("/Users/{user}/Box Sync/NACCHO GIS/lhd-updates/data") 
 
 ## ---- !!!YOU SHOULD NOT NEED TO EDIT BELOW INFORMATION!!! ---- 
 

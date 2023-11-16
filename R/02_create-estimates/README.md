@@ -16,10 +16,18 @@ The workflow to generate demographic and socioeconomic estimates based on ACS 5-
   - This creates variables and file paths used by subsequent scripts
 3. Run the `acs_totals_workflow.R` script
   - This script creates a CSV with ACS-based totals (total population, total households, total housing units), counts by major race groups, and counts by housing tenure (owner-occupied, renter-occupied)
+  - A CSV file with the name lhd{year}_acstotals.csv will be written to the `output-data/{acs_dataset}` directory
   - This script also creates data frames that are required for the scripts that start with **ipf**
 4. Run the **ipf** scripts
   - The **ipf** scripts can be run in any order
   - Each **ipf** script creates a CSV where every row is an LHD and every column provides infomration about people or households residing in the LHD
+  - The **ipf** scripts write out CSV files with the following names  
+    - lhd{year}_grossrent.csv
+    - lhd{year}_hhincome.csv
+    - lhd{year}_ownoccvalue.csv
+    - lhd{year}_sexage.csv
+
+Refer to `output-data/estimates_codebook.xlsx` for variable definitions for each file.
 
 ## Overview of urban/rural workflow
 The workflow to generate urban/rural counts based on the 2020 decennial census follows these steps:
@@ -35,6 +43,8 @@ The workflow to generate urban/rural counts based on the 2020 decennial census f
     - lhd2022_urban_rural_2020.csv
       - lhd2022: this is the LHD vintage for which you are generating counts, and is based on the value of the `lhd_vintage` variable set in the naccho_configuration.R script
       - urban_rural_2022.csv: this is the fixed part of the file name
+
+Refer to `output-data/estimates_codebook.xlsx` for variable definitions for each file.
 
 ## Scripts
 Generating demographic and socioeconomic status estimates for LHDs is accomplished by running a set of R scripts in RStudio. This section lists those scripts and provides short descriptions of what they create.
@@ -75,4 +85,5 @@ Generating demographic and socioeconomic status estimates for LHDs is accomplish
 
 The scripts prefixed with **ipf** attempt to use iterative proportional fitting (IPF) to generate LHD-level estimates. In some states, IPF will not run. In those cases, we revert to down-weighting to generate the LHD estimates. We flag LHDs whose estimates were successfully generated via IPF.  
 
-
+## Questions
+If you have questions about this workflow or the data please reach out to David Van Riper (vanriper@umn.edu).
