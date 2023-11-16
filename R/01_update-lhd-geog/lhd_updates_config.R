@@ -18,7 +18,7 @@ library(glue)
 user <- "knowlesk"
 
 # Set base data directory -- if the username is the only change this does not need editing after the initial run
-dat_dir <- glue("C:/Users/{user}/Box/NACCHO GIS/data")
+dat_dir <- glue("C:/Users/{user}/Box/NACCHO GIS/lhd-updates/data")
 
 ## ---- Set lhd year ----
 

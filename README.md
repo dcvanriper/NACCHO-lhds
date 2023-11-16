@@ -86,7 +86,7 @@ You can save your API key to the IPUMS_API_KEY environment variable with set_ipu
 
 ### Setting up the directory structure
 
-We have written the code to create directories if they do not exist, but there are some directories that must be set up in advance of running any code. NACCHO staff will need to ensure their directory structure and names match the structure shown below. Directories and files marked with a star will be created automatically. The code expects directories with certain names. 
+We have written the code to create directories if they do not exist, but there are some directories that must be set up in advance of running any code. NACCHO staff will need to ensure their directory structure and names match the structure shown below. Directories and files marked with a star will be created automatically. The original .zip file shared with NACCHO in November, 2023 includes this structure and all 2022 LHD coverage lists and population estimates. It can be shared with multiple NACCHO staff members. If the directory is being built from scratch, you will need to re-create the structure below with matching file names for the scripts to run correctly.
 
     lhd-updates
        |
@@ -110,16 +110,14 @@ We have written the code to create directories if they do not exist, but there a
         |
         - 01_update-lhd-geog
             |
-            - individual R scripts*
+            - individual R scripts
         - 02_create-estimates
               |
-              - individual R scripts*
+              - individual R scripts
 
 Please refer to the README files in `01_update-lhd-geog` or `02_create-estimates` for more detailed documentation on the contents of these folders.
 
-## Timing
-
-### Population estimate update timing
+## Population estimate update timing
 New ACS 5-year datasets are released in December, and IPUMS NHGIS tries to add them within six weeks of their release. For example, the 2018-2022 ACS dataset will be released in December 2023. IPUMS NHGIS should have them available by the end of January 2024. Thus, the lists of geographic units to update LHD coverage and subsequent population estimates based on the 2018-2022 dataset can be generated in January or February 2024.
 
 ## Contact Information
